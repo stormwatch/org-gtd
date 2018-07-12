@@ -590,16 +590,16 @@ so change the default 'F' binding in the agenda to allow both"
   ;; Allow refile to create parent tasks with confirmation
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
-  ;; Use IDO for both buffer and file completion and ido-everywhere to t
-  (setq org-completion-use-ido t)
-  (setq ido-everywhere t)
-  (setq ido-max-directory-size 100000)
-  (ido-mode (quote both))
-  ;; Use the current window when visiting files and buffers with ido
-  (setq ido-default-file-method 'selected-window)
-  (setq ido-default-buffer-method 'selected-window)
-  ;; Use the current window for indirect buffer display
-  (setq org-indirect-buffer-display 'current-window)
+  ;; ;; Use IDO for both buffer and file completion and ido-everywhere to t
+  ;; (setq org-completion-use-ido t)
+  ;; (setq ido-everywhere t)
+  ;; (setq ido-max-directory-size 100000)
+  ;; (ido-mode (quote both))
+  ;; ;; Use the current window when visiting files and buffers with ido
+  ;; (setq ido-default-file-method 'selected-window)
+  ;; (setq ido-default-buffer-method 'selected-window)
+  ;; ;; Use the current window for indirect buffer display
+  ;; (setq org-indirect-buffer-display 'current-window)
 
   ;;;; Refile settings
   ;; Exclude DONE state tasks from refile targets
@@ -1069,7 +1069,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 
   (setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
   ;; (setq org-plantuml-jar-path "~/java/plantuml.jar")
-  (setq org-plantuml-jar-path "/usr/local/Cellar/plantuml/1.2018.2/libexec/plantuml.jar")
+  (setq org-plantuml-jar-path "/usr/local/Cellar/plantuml/1.2018.8/libexec/plantuml.jar")
 
   (add-hook 'org-babel-after-execute-hook 'bh/display-inline-images 'append)
 
