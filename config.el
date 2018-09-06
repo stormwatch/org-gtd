@@ -11,5 +11,6 @@
 
 ;; variables
 
-(defvar gtd-base-path "~/git/org/"
-  "Base path for org-mode and org-brain.")
+(defvar gtd-base-path
+	(concat org-directory "/")
+	"Base path for org-mode and org-brain.")
