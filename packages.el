@@ -10,18 +10,17 @@
 ;;
 ;;; License: GPLv3
 
-(setq gtd-packages
-    '(
-      org
-      org-agenda
-      boxquote
-      ))
+(defconst gtd-packages
+			`(
+				org
+				org-agenda
+				;; boxquote
+				,(unless (spacemacs/system-is-mswindows)
+					 'bbdb))
+			)
 
 ;; List of packages to exclude.
 (setq gtd-excluded-packages '())
-
-(when (not (spacemacs/system-is-mswindows))
-  (push 'bbdb gtd-packages))
 
 (defun gtd/init-bbdb()
   (use-package bbdb
@@ -62,14 +61,14 @@
                              (t "NameOfCaller")))
           (insert caller))))))
 
-(defun gtd/init-boxquote()
-  (use-package boxquote
-    :defer t
-    :init
-    (progn
-      (define-key global-map (kbd "<f9> r") 'boxquote-region)
-      (define-key global-map (kbd "<f9> f") 'boxquote-insert-file))
-    ))
+;; (defun gtd/init-boxquote()
+;;   (use-package boxquote
+;;     :defer t
+;;     :init
+;;     (progn
+;;       (define-key global-map (kbd "<f9> r") 'boxquote-region)
+;;       (define-key global-map (kbd "<f9> f") 'boxquote-insert-file))
+;;     ))
 
 (defun gtd/post-init-org-agenda()
   (require 'org-habit)
@@ -79,7 +78,10 @@
   (setq org-agenda-span 'day)
 
   ;; (setq org-agenda-files (quote ("~/git/org/")))
-  (setq org-agenda-files (list gtd-base-path))
+  (setq
+	 org-agenda-files
+	 (mapcar #'(lambda (file) (concat gtd-base-path file))
+					 '("refile.org" "tickler.org" "gtd.org")))
 
   ;; Do not dim blocked tasks
   (setq org-agenda-dim-blocked-tasks nil)
@@ -425,27 +427,27 @@ so change the default 'F' binding in the agenda to allow both"
   (setq org-agenda-diary-file (concat gtd-base-path "diary.org"))
   (setq org-agenda-insert-diary-extract-time t)
 
-  ;; Include agenda archive files when searching for things
-  (setq org-agenda-text-search-extra-files (quote (agenda-archives)))
-  )
+	;; Include agenda archive files when searching for things
+	(setq org-agenda-text-search-extra-files (quote (agenda-archives)))
+	)
 
 (defun gtd/pre-init-org ()
-  (spacemacs|use-package-add-hook org
-    :post-config
-    (progn
-      (setq org-default-notes-file (concat gtd-base-path "refile.org"))
+	(spacemacs|use-package-add-hook org
+		:post-config
+		(progn
+		  (setq org-default-notes-file (concat gtd-base-path "refile.org"))
 
-      (require 'org-id)
-      (defun bh/clock-in-task-by-id (id)
-        "Clock in a task by id"
-        (org-with-point-at (org-id-find id 'marker)
-          (org-clock-in nil)))
+			(require 'org-id)
+			(defun bh/clock-in-task-by-id (id)
+				"Clock in a task by id"
+				(org-with-point-at (org-id-find id 'marker)
+					(org-clock-in nil)))
 
-      (defun bh/clock-in-organization-task-as-default ()
-        (interactive)
-        (org-with-point-at (org-id-find bh/organization-task-id 'marker)
-          (org-clock-in '(16)))))
-    ))
+			(defun bh/clock-in-organization-task-as-default ()
+				(interactive)
+				(org-with-point-at (org-id-find bh/organization-task-id 'marker)
+					(org-clock-in '(16)))))
+		))
 
 (defun gtd/post-init-org ()
   (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
@@ -1068,9 +1070,9 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
   ;; (require 'ox-latex)
   ;; (require 'ox-ascii)
 
-  (setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
+  ;; (setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
   ;; (setq org-plantuml-jar-path "~/java/plantuml.jar")
-  (setq org-plantuml-jar-path "/usr/local/Cellar/plantuml/1.2018.8/libexec/plantuml.jar")
+  ;; (setq org-plantuml-jar-path "/usr/local/Cellar/plantuml/1.2018.8/libexec/plantuml.jar")
 
   (add-hook 'org-babel-after-execute-hook 'bh/display-inline-images 'append)
 
@@ -1082,33 +1084,33 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
         (org-display-inline-images)
       (error nil)))
 
-  (org-babel-do-load-languages
-   (quote org-babel-load-languages)
-   (quote ((emacs-lisp . t)
-           (dot . t)
-           (ditaa . t)
-           (R . t)
-           (python . t)
-           (ruby . t)
-           (gnuplot . t)
-           (clojure . t)
-           (shell . t)
-           (ledger . t)
-           (org . t)
-           (plantuml . t)
-           (latex . t))))
+  ;; (org-babel-do-load-languages
+  ;;  (quote org-babel-load-languages)
+  ;;  (quote ((emacs-lisp . t)
+  ;;          (dot . t)
+  ;;          (ditaa . t)
+  ;;          (R . t)
+  ;;          (python . t)
+  ;;          (ruby . t)
+  ;;          (gnuplot . t)
+  ;;          (clojure . t)
+  ;;          (shell . t)
+  ;;          (ledger . t)
+  ;;          (org . t)
+  ;;          (plantuml . t)
+  ;;          (latex . t))))
 
   ;; Do not prompt to confirm evaluation
   ;; This may be dangerous - make sure you understand the consequences
   ;; of setting this -- see the docstring for details
-  (setq org-confirm-babel-evaluate nil)
+  ;; (setq org-confirm-babel-evaluate nil)
 
   ;; Use fundamental mode when editing plantuml blocks with C-c '
-  (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
+  ;; (add-to-list 'org-src-lang-modes (quote ("plantuml" . fundamental)))
 
   ;; Don't enable this because it breaks access to emacs from my
   ;; Android phone
-  (setq org-startup-with-inline-images nil)
+  ;; (setq org-startup-with-inline-images nil)
 
   ;; ;; experimenting with docbook exports - not finished
   ;; (setq org-export-docbook-xsl-fo-proc-command "fop %s %s")
