@@ -14,7 +14,9 @@
 			`(
 				org
 				org-agenda
+				org-capture
 				;; boxquote
+				org-expiry
 				,(unless (spacemacs/system-is-mswindows)
 					 'bbdb))
 			)
@@ -546,7 +548,7 @@ so change the default 'F' binding in the agenda to allow both"
                 ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
                 ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 
-  (setq org-directory gtd-base-path)
+  (setq org-directory (subseq gtd-base-path 0 -1))
 
   ;; Capture templates for: TODO tasks, Notes, appointments, phone calls,
   ;; meetings, and org-protocol
@@ -1318,5 +1320,23 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
   ;; Variable org-show-entry-below is deprecated
   ;; (setq org-show-entry-below (quote ((default))))
   )
+
+(defun gtd/init-org-expiry()
+	(use-package org-expiry
+    :defer t
+    :config
+    (progn
+      (setq org-expiry-inactive-timestamps t)
+      (org-expiry-insinuate))))
+
+(defun gtd/init-org-capture ()
+	(use-package org-capture
+    :defer t
+    :config
+    (add-hook 'org-capture-before-finalize-hook
+              #'(lambda()
+                  (save-excursion
+                    ;;(org-back-to-heading)
+                    (org-expiry-insert-created))))))
 
 ;; EOF
