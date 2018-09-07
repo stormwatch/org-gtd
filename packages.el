@@ -553,21 +553,21 @@ so change the default 'F' binding in the agenda to allow both"
   ;; Capture templates for: TODO tasks, Notes, appointments, phone calls,
   ;; meetings, and org-protocol
   (setq org-capture-templates
-        `(("t" "todo" entry (file ,(concat gtd-base-path "refile.org"))
+        `(("t" "todo" entry (file "")
            "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-          ("r" "respond" entry (file ,(concat gtd-base-path "refile.org"))
+          ("r" "respond" entry (file "")
            "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-          ("n" "note" entry (file ,(concat gtd-base-path "refile.org"))
+          ("n" "note" entry (file "")
            "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
           ("j" "Journal" entry (file+datetree ,(concat gtd-base-path "diary.org"))
            "* %?\n%U\n" :clock-in t :clock-resume t)
-          ("w" "org-protocol" entry (file ,(concat gtd-base-path "refile.org"))
+          ("w" "org-protocol" entry (file "")
            "* TODO Review %c\n%U\n" :immediate-finish t)
-          ("m" "Meeting" entry (file ,(concat gtd-base-path "refile.org"))
+          ("m" "Meeting" entry (file "")
            "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-          ("p" "Phone call" entry (file ,(concat gtd-base-path "refile.org"))
+          ("p" "Phone call" entry (file "")
            "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-          ("h" "Habit" entry (file ,(concat gtd-base-path "refile.org"))
+          ("h" "Habit" entry (file "")
            "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
 
   ;; Remove empty LOGBOOK drawers on clock out
