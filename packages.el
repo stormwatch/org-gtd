@@ -14,9 +14,7 @@
 			`(
 				org
 				org-agenda
-				org-capture
 				;; boxquote
-				org-expiry
 				,(unless (spacemacs/system-is-mswindows)
 					 'bbdb))
 			)
@@ -27,9 +25,9 @@
 (defun gtd/init-bbdb()
   (use-package bbdb
     :defer t
+		:commands bbdb-search
     :config
     (progn
-      (require 'bbdb-com)
       (define-key global-map (kbd "<f9> b") 'bbdb)
       (define-key global-map (kbd "<f9> p") 'bh/phone-call)
       ;; Phone capture template handling with BBDB lookup
@@ -73,7 +71,8 @@
 ;;     ))
 
 (defun gtd/post-init-org-agenda()
-  (require 'org-habit)
+	;; org-habit is autoloaded in org-plus-contrib so this require should be removed probably.
+  ;; (require 'org-habit)
 
   (global-set-key (kbd "<f12>") 'org-agenda)
 
@@ -439,7 +438,8 @@ so change the default 'F' binding in the agenda to allow both"
 		(progn
 		  (setq org-default-notes-file (concat gtd-base-path "refile.org"))
 
-			(require 'org-id)
+			;; org-id-find is autoloaded so this require is probably superfluous
+			;; (require 'org-id)
 			(defun bh/clock-in-task-by-id (id)
 				"Clock in a task by id"
 				(org-with-point-at (org-id-find id 'marker)
@@ -550,25 +550,31 @@ so change the default 'F' binding in the agenda to allow both"
 
   (setq org-directory (subseq gtd-base-path 0 -1))
 
-  ;; Capture templates for: TODO tasks, Notes, appointments, phone calls,
-  ;; meetings, and org-protocol
-  (setq org-capture-templates
-        `(("t" "todo" entry (file "")
-           "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-          ("r" "respond" entry (file "")
-           "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-          ("n" "note" entry (file "")
-           "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-          ("j" "Journal" entry (file+datetree ,(concat gtd-base-path "diary.org"))
-           "* %?\n%U\n" :clock-in t :clock-resume t)
-          ("w" "org-protocol" entry (file "")
-           "* TODO Review %c\n%U\n" :immediate-finish t)
-          ("m" "Meeting" entry (file "")
-           "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-          ("p" "Phone call" entry (file "")
-           "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-          ("h" "Habit" entry (file "")
-           "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
+	(with-eval-after-load 'org-capture
+		;; Capture templates for: TODO tasks, Notes, appointments, phone calls,
+		;; meetings, and org-protocol
+		(setq org-capture-templates
+					`(("t" "todo" entry (file "")
+						 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+						("r" "respond" entry (file "")
+						 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+						("n" "note" entry (file "")
+						 "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+						("j" "Journal" entry (file+olp+datetree ,(concat gtd-base-path "diary.org"))
+						 "* %?\n%U\n" :clock-in t :clock-resume t)
+						("w" "org-protocol" entry (file "")
+						 "* TODO Review %c\n%U\n" :immediate-finish t)
+						("m" "Meeting" entry (file "")
+						 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+						("p" "Phone call" entry (file "")
+						 "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+						("h" "Habit" entry (file "")
+						 "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
+		(add-hook 'org-capture-before-finalize-hook
+							#'(lambda()
+									(save-excursion
+										;;(org-back-to-heading)
+										(org-expiry-insert-created)))))
 
   ;; Remove empty LOGBOOK drawers on clock out
   (defun bh/remove-empty-drawer-on-clock-out ()
@@ -587,7 +593,7 @@ so change the default 'F' binding in the agenda to allow both"
                                    (org-agenda-files :maxlevel . 9))))
 
   ;; Use full outline paths for refile targets - we file directly with IDO
-  (setq org-refile-use-outline-path t)
+  (setq org-refile-use-outline-path 'file)
 
   ;; Targets complete directly with IDO
   (setq org-outline-path-complete-in-steps nil)
@@ -606,7 +612,7 @@ so change the default 'F' binding in the agenda to allow both"
   ;; ;; Use the current window for indirect buffer display
   ;; (setq org-indirect-buffer-display 'current-window)
 
-  ;;;; Refile settings
+;;;; Refile settings
   ;; Exclude DONE state tasks from refile targets
   (defun bh/verify-refile-target ()
     "Exclude todo keywords with a done state from refile targets"
@@ -897,7 +903,7 @@ Callers of this function already widen the buffer view."
                     (setq has-next t))))
               (if has-next
                   next-headline
-                nil)) ; a stuck project, has subtasks but no next task
+                nil))						; a stuck project, has subtasks but no next task
           next-headline))))
 
   (defun bh/skip-non-projects ()
@@ -1061,7 +1067,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
                                                   (re-search-forward (concat last-month "\\|" this-month) subtree-end t)))))
                   (if subtree-is-current
                       subtree-end ; Has a date in this month or last month, skip it
-                    nil))  ; available to archive
+                    nil))					; available to archive
               (or subtree-end (point-max)))
           next-headline))))
 
@@ -1321,22 +1327,11 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
   ;; (setq org-show-entry-below (quote ((default))))
   )
 
-(defun gtd/init-org-expiry()
-	(use-package org-expiry
-    :defer t
-    :config
-    (progn
-      (setq org-expiry-inactive-timestamps t)
-      (org-expiry-insinuate))))
+(defun gtd/post-init-org-expiry()
+	(setq org-expiry-inactive-timestamps t)
+	(org-expiry-insinuate)
+	(message "This is gtd/post-init-org-expiry"))
 
-(defun gtd/init-org-capture ()
-	(use-package org-capture
-    :defer t
-    :config
-    (add-hook 'org-capture-before-finalize-hook
-              #'(lambda()
-                  (save-excursion
-                    ;;(org-back-to-heading)
-                    (org-expiry-insert-created))))))
+
 
 ;; EOF
