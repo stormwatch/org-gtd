@@ -1329,9 +1329,6 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 
 (defun gtd/post-init-org-expiry()
 	(setq org-expiry-inactive-timestamps t)
-	(org-expiry-insinuate)
-	(message "This is gtd/post-init-org-expiry"))
-
-
+	(org-expiry-insinuate))
 
 ;; EOF
